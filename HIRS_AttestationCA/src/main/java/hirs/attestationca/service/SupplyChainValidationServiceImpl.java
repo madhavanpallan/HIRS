@@ -749,7 +749,8 @@ public class SupplyChainValidationServiceImpl implements SupplyChainValidationSe
             final Set<String> previouslyQueriedOrganizations) {
         CertificateSelector<CertificateAuthorityCredential> caSelector = null;
         Set<CertificateAuthorityCredential> certAuthsWithMatchingOrg;
-        if (credential.getIssuerOrganization() != null && !credential.getIssuerOrganization().isEmpty()) {
+        if (credential.getIssuerOrganization() != null
+                && !credential.getIssuerOrganization().isEmpty()) {
             caSelector = CertificateAuthorityCredential.select(certificateManager)
                     .bySubjectOrganization(credential.getIssuerOrganization());
             certAuthsWithMatchingOrg = caSelector.getCertificates();
