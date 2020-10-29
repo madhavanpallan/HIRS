@@ -234,6 +234,24 @@ public abstract class CertificateSelector<T extends Certificate> {
     }
 
     /**
+     * Specify a Authority Key Identifier string that certificates must have to be considered
+     * as matching.
+     *
+     * @param authorityKeyIdentifier certificate Authority Key Identifier string to query,
+     *                               not empty or null
+     * @return this instance (for chaining further calls)
+     */
+    public CertificateSelector<T> byAuthorityKeyIdentifier(final String authorityKeyIdentifier) {
+        Preconditions.checkArgument(
+                StringUtils.isNotEmpty(authorityKeyIdentifier),
+                "organization cannot be null or empty."
+        );
+
+        setFieldValue(Certificate.AKI_FIELD, authorityKeyIdentifier);
+        return this;
+    }
+
+    /**
      * Specify a public key that certificates must have to be considered
      * as matching.
      *

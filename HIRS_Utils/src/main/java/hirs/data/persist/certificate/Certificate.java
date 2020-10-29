@@ -255,6 +255,10 @@ public abstract class Certificate extends ArchivableEntity {
     private String keyUsage;
     private String extendedKeyUsage;
     private byte[] policyConstraints;
+    /**
+     * String value for the DB column name associated with the Authority Key Identifier.
+     */
+    public static final String AKI_FIELD = "authorityKeyIdentifier";
     private String authorityKeyIdentifier;
     private String authorityInfoAccess;
     private String crlPoints;
