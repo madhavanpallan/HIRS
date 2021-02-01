@@ -8,6 +8,7 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Criteria;
+import org.hibernate.dialect.MySQL5Dialect;
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -31,6 +32,9 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -60,6 +64,8 @@ public abstract class AbstractDbManager<T> implements CrudManager<T> {
     private final Class<T> clazz;
 
     private SessionFactory factory;
+    private CriteriaBuilder criteriaBuilder;
+    private CriteriaQuery<T> criteriaQuery;
 
     /**
      * Creates a new <code>AbstractDbManager</code>.
@@ -161,14 +167,15 @@ public abstract class AbstractDbManager<T> implements CrudManager<T> {
      * @return the configured database implementation
      */
     protected DBManager.DBImpl getConfiguredImplementation() {
-        String dialect = ((SessionFactoryImpl) factory).getDialect().toString().toLowerCase();
-        if (dialect.contains("hsql")) {
+        Dialect dialect = factory.getDialect();
+        String dialectStr = dialect.toString().toLowerCase();
+        if (dialectStr.contains("hsql")) {
             return DBManager.DBImpl.HSQL;
-        } else if (dialect.contains("mysql")) {
+        } else if (dialectStr.contains("mysql")) {
             return DBManager.DBImpl.MYSQL;
         } else {
             throw new DBManagerException(String.format(
-                    "Using unknown implementation: %s", dialect
+                    "Using unknown implementation: %s", dialectStr
             ));
         }
     }
@@ -245,9 +252,15 @@ public abstract class AbstractDbManager<T> implements CrudManager<T> {
         try {
             LOGGER.debug("retrieving object from db");
             tx = session.beginTransaction();
-            Object object = session.createCriteria(clazz)
-                    .add(Restrictions.eq("name", name)).uniqueResult();
-            if (object != null && clazz.isInstance(object)) {
+            criteriaBuilder = session.getCriteriaBuilder();
+            criteriaQuery = criteriaBuilder.createQuery(clazz);
+            criteriaQuery.from(clazz);
+            Root<T> root = criteriaQuery.from(clazz);
+            criteriaQuery.select(root).where(criteriaBuilder.equal(root.get("name"), name));
+
+            Object object = session.createQuery(criteriaQuery).getSingleResult();
+
+            if (clazz.isInstance(object)) {
                 T objectOfTypeT = clazz.cast(object);
                 LOGGER.debug("found object, deleting it");
                 session.delete(objectOfTypeT);
@@ -316,11 +329,15 @@ public abstract class AbstractDbManager<T> implements CrudManager<T> {
         Session session = factory.getCurrentSession();
         try {
             LOGGER.debug("Deleting instances of class: {}", clazz);
+            criteriaBuilder = session.getCriteriaBuilder();
+            criteriaQuery = criteriaBuilder.createQuery(clazz);
+            criteriaQuery.from(clazz);
+            Root<T> root = criteriaQuery.from(clazz);
+            Query<T> query = session.createQuery(criteriaQuery);
             tx = session.beginTransaction();
-            List instances = session.createCriteria(clazz)
-                    .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
+            List<Object> instances = query.getResultList();
             for (Object instance : instances) {
-                if (instance != null && clazz.isInstance(instance)) {
+                if (clazz.isInstance(instance)) {
                     session.delete(clazz.cast(instance));
                     numEntitiesDeleted++;
                 }
@@ -387,7 +404,7 @@ public abstract class AbstractDbManager<T> implements CrudManager<T> {
             }
             List list = criteria.list();
             for (Object o : list) {
-                if (o != null && clazzToGet.isInstance(o)) {
+                if (clazzToGet.isInstance(o)) {
                     ret.add(clazzToGet.cast(o));
                 }
             }

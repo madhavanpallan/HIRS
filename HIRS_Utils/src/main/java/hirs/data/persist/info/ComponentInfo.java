@@ -100,7 +100,7 @@ public class ComponentInfo implements Serializable {
                 componentModel,
                 componentSerial,
                 componentRevision
-        ));
+        ), "This is bad.");
         this.componentManufacturer = componentManufacturer.trim();
         this.componentModel = componentModel.trim();
         if (componentSerial != null) {
@@ -131,9 +131,10 @@ public class ComponentInfo implements Serializable {
                                      final String componentModel,
                                      final String componentSerial,
                                      final String componentRevision) {
-        return !(
-                StringUtils.isEmpty(componentManufacturer)  || StringUtils.isEmpty(componentModel)
-        );
+        return !(StringUtils.isEmpty(componentManufacturer)
+                || StringUtils.isEmpty(componentModel)
+                || StringUtils.isEmpty(componentSerial)
+                || StringUtils.isEmpty(componentRevision));
     }
 
     @Override
