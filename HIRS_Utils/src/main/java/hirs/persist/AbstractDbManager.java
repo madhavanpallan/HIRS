@@ -8,6 +8,7 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Criteria;
+import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.MySQL5Dialect;
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
@@ -24,6 +25,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.internal.SessionFactoryImpl;
+import org.hibernate.query.Query;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -167,7 +169,7 @@ public abstract class AbstractDbManager<T> implements CrudManager<T> {
      * @return the configured database implementation
      */
     protected DBManager.DBImpl getConfiguredImplementation() {
-        Dialect dialect = factory.getDialect();
+        Dialect dialect = ((SessionFactoryImpl) factory).getJdbcServices().getDialect();
         String dialectStr = dialect.toString().toLowerCase();
         if (dialectStr.contains("hsql")) {
             return DBManager.DBImpl.HSQL;
@@ -335,7 +337,7 @@ public abstract class AbstractDbManager<T> implements CrudManager<T> {
             Root<T> root = criteriaQuery.from(clazz);
             Query<T> query = session.createQuery(criteriaQuery);
             tx = session.beginTransaction();
-            List<Object> instances = query.getResultList();
+            List<T> instances = query.getResultList();
             for (Object instance : instances) {
                 if (clazz.isInstance(instance)) {
                     session.delete(clazz.cast(instance));

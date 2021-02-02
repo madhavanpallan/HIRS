@@ -12,6 +12,7 @@ import java.util.Objects;
 
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.StringType;
 import org.hibernate.usertype.UserType;
 
@@ -95,7 +96,7 @@ public final class InetAddressType implements UserType {
      */
     @Override
     public Object nullSafeGet(final ResultSet rs, final String[] names,
-            final SessionImplementor session, final Object owner)
+            final SharedSessionContractImplementor session, final Object owner)
             throws HibernateException, SQLException {
         final String ip = (String) StringType.INSTANCE.get(rs, names[0],
                 session);
@@ -122,7 +123,7 @@ public final class InetAddressType implements UserType {
      */
     @Override
     public void nullSafeSet(final PreparedStatement st, final Object value,
-            final int index, final SessionImplementor session)
+            final int index, final SharedSessionContractImplementor session)
             throws SQLException {
         if (value == null) {
             StringType.INSTANCE.set(st, null, index, session);
