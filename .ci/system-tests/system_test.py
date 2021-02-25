@@ -966,6 +966,7 @@ class SystemTest(unittest.TestCase):
       self.assertEqual(devices['data'][0]['device']['supplyChainStatus'], "FAIL")
 
       # Upload the VARDeltaCertB1 and provision
+      logging.error(VARDeltaCertB1_LOCATION);
       AcaPortal.upload_pk_cert(VARDeltaCertB1_LOCATION)
       AcaPortal.enable_supply_chain_validations()
       provisioner_out = run_hirs_provisioner_tpm_2_0(CLIENT)
