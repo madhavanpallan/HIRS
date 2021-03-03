@@ -722,6 +722,7 @@ class SystemTest(unittest.TestCase):
       logging.info("***************** test_20_A2 - Beginning of delta certificate test *****************")
       logging.info("Attempt to upload PBaseCertB, with PBaseCertA already loaded in the ACA.")
 
+      AcaPortal.upload_pk_cert(PBaseCertA_LOCATION)
       print("test_20_A2_base_delta. PBaseCertA has already been loaded. Attempting to upload second Platform Cert: %s" % (PBaseCertB_LOCATION))
 
       # Confirm there is one Platform Base Cert already loaded
