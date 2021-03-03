@@ -885,7 +885,7 @@ class SystemTest(unittest.TestCase):
       AcaPortal.enable_supply_chain_validations()
       provisioner_out = run_hirs_provisioner_tpm_2_0(CLIENT)
 
-      print("test_20_A7_base_delta SHOULD PASS provisioning using: %s" % (VARDeltaCertA2_resolved_LOCATION))
+      print("test_20_A7_base_delta SHOULD FAIL provisioning using: %s" % (VARDeltaCertA2_resolved_LOCATION))
       print("test_20_A7_base_delta run output: {0}".format(provisioner_out))
 
        # Verify device has been updated with supply chain appraisal result
@@ -909,7 +909,7 @@ class SystemTest(unittest.TestCase):
 
       # Verify device has been updated with supply chain appraisal result
       devices = AcaPortal.get_devices()
-      self.assertEqual(devices['data'][0]['device']['supplyChainStatus'], "PASS")
+      self.assertEqual(devices['data'][0]['device']['supplyChainStatus'], "FAIL")
 
    @collectors(['BASE_DELTA_BAD'], COLLECTOR_LIST)
    @unittest.skipIf(not is_tpm_2_0(TPM_VERSION), "Skipping this test due to TPM Version " + TPM_VERSION)
